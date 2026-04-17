@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Secrets (nunca commitar)
+.streamlit/secrets.toml
+.env
+*.secret
+
+# Dados locais (ficam no OneDrive; no Cloud vêm via URL)
+*.xlsx
+*.xlsm
+*.xls
+
+# Arquivos de persistência local (user-specific)
+_ignorados.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
