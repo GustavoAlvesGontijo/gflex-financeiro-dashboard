@@ -11,8 +11,8 @@ env/
 .env
 *.secret
 
-# Dados locais (ficam no OneDrive; no Cloud vêm via URL)
-*.xlsx
+# Dados financeiros — repo é PRIVADO, Streamlit Cloud usa deploy key pra ler
+# xlsx commitados propositalmente (atualizados pelo script 04_consolidar_tudo)
 *.xlsm
 *.xls
 
