@@ -1,17 +1,34 @@
 # -*- coding: utf-8 -*-
 """
 Dashboard Financeiro GFlex — Filtros Globais + Página Inicial.
-Filtros aplicam em TODAS as páginas: Empresa, Grupo, Data início/fim, Base de data.
 """
-import streamlit as st
+import sys, traceback
+print("[GFLEX] app.py iniciando...", flush=True)
+print("[GFLEX] python", sys.version, flush=True)
+
+try:
+    import streamlit as st
+    print("[GFLEX] streamlit importado", flush=True)
+except Exception as e:
+    print(f"[GFLEX] ERRO importando streamlit: {e}", flush=True)
+    traceback.print_exc()
+    raise
+
 from datetime import date, datetime, timedelta
 import os
+print("[GFLEX] datetime/os importados", flush=True)
 
-from config import (
-    MESES_PT, GRUPOS, ORDEM_EMPRESAS,
-    ONEDRIVE_DIR, ARQ_PAGAMENTOS, ARQ_RECEBIMENTOS,
-    fmt_brl_milhao, fmt_brl,
-)
+try:
+    from config import (
+        MESES_PT, GRUPOS, ORDEM_EMPRESAS,
+        ONEDRIVE_DIR, ARQ_PAGAMENTOS, ARQ_RECEBIMENTOS,
+        fmt_brl_milhao, fmt_brl,
+    )
+    print("[GFLEX] config importado", flush=True)
+except Exception as e:
+    print(f"[GFLEX] ERRO importando config: {e}", flush=True)
+    traceback.print_exc()
+    raise
 from data_loader import (
     load_pagamentos, load_recebimentos,
     lista_empresas, lista_departamentos,
