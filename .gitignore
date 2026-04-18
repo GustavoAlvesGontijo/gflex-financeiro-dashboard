@@ -11,8 +11,9 @@ env/
 .env
 *.secret
 
-# Dados financeiros — repo é PRIVADO, Streamlit Cloud usa deploy key pra ler
-# xlsx commitados propositalmente (atualizados pelo script 04_consolidar_tudo)
+# Dados financeiros — NUNCA commitar neste repo (é público)
+# Os xlsx ficam no repo privado separado `gflex-financeiro-data`
+*.xlsx
 *.xlsm
 *.xls
 
