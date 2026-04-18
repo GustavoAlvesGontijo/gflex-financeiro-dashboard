@@ -15,41 +15,45 @@ from config import (
 )
 
 # ============ HELPER: resolve fonte (URL remota via secrets OU caminho local) ============
-def _resolve_source(secret_key: str, nome_arquivo: str):
+def _resolve_source(nome_arquivo: str):
     """
-    Prioridade de busca:
-    1) URL via secrets (Streamlit Cloud com link externo)
-    2) URL via variável de ambiente
-    3) Arquivo junto ao repo (xlsx commitado no repo privado — funciona no Cloud)
-    4) OneDrive local (fallback PC do Gustavo)
+    Prioridade:
+    1) GitHub repo privado via Personal Access Token (produção/Cloud)
+       Usa st.secrets["github"] com: token, owner, repo, branch
+    2) OneDrive local (fallback PC do Gustavo)
+    Retorna: ('github', dict) ou ('file', str) ou (None, None)
     """
-    # 1) Secrets
+    # 1) GitHub API autenticada
     try:
-        url = st.secrets["data"][secret_key]
-        if url:
-            return ("url", url)
+        gh = st.secrets["github"]
+        if gh.get("token"):
+            return ("github", {
+                "token": gh["token"],
+                "owner": gh.get("owner", "GustavoAlvesGontijo"),
+                "repo": gh.get("repo", "gflex-financeiro-data"),
+                "branch": gh.get("branch", "master"),
+                "arquivo": nome_arquivo,
+            })
     except Exception:
         pass
-    # 2) Env
-    env_val = os.getenv(secret_key)
-    if env_val:
-        return ("url", env_val)
-    # 3) Arquivo no repo (mesma pasta que app.py)
-    repo_fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), nome_arquivo)
-    if os.path.exists(repo_fp):
-        return ("file", repo_fp)
-    # 4) OneDrive local
+    # 2) Arquivo local no OneDrive (dev/PC Gustavo)
     fp = os.path.join(ONEDRIVE_DIR, nome_arquivo)
     if os.path.exists(fp):
         return ("file", fp)
     return (None, None)
 
 def _read_excel(src, sheet_name):
-    """Lê Excel de URL ou caminho local."""
+    """Lê Excel do GitHub privado (API) ou de caminho local."""
     tipo, valor = src
-    if tipo == "url":
+    if tipo == "github":
         import requests
-        r = requests.get(valor, timeout=30)
+        url = (f"https://api.github.com/repos/{valor['owner']}/{valor['repo']}"
+               f"/contents/{valor['arquivo']}?ref={valor['branch']}")
+        headers = {
+            "Authorization": f"Bearer {valor['token']}",
+            "Accept": "application/vnd.github.raw",  # baixa binário direto
+        }
+        r = requests.get(url, headers=headers, timeout=30)
         r.raise_for_status()
         return pd.read_excel(io.BytesIO(r.content), sheet_name=sheet_name)
     elif tipo == "file":
@@ -60,9 +64,9 @@ def _read_excel(src, sheet_name):
 # ============ LOADERS ============
 @st.cache_data(ttl=CACHE_TTL_SECONDS, show_spinner="Carregando União de Pagamentos...")
 def load_pagamentos() -> pd.DataFrame:
-    src = _resolve_source("URL_PAGAMENTOS", ARQ_PAGAMENTOS)
+    src = _resolve_source(ARQ_PAGAMENTOS)
     if src[0] is None:
-        st.error(f"❌ Fonte de dados (Pagamentos) não configurada. Veja README.md")
+        st.error("❌ Fonte de dados (Pagamentos) não configurada. Configure o secret `[github]` no Streamlit Cloud.")
         return pd.DataFrame()
     df = _read_excel(src, "Pagamentos")
     for c in ["VENCIMENTO", "PGTO", "DATA DE PGTO."]:
@@ -87,9 +91,9 @@ def load_pagamentos() -> pd.DataFrame:
 
 @st.cache_data(ttl=CACHE_TTL_SECONDS, show_spinner="Carregando União de Recebimentos...")
 def load_recebimentos() -> pd.DataFrame:
-    src = _resolve_source("URL_RECEBIMENTOS", ARQ_RECEBIMENTOS)
+    src = _resolve_source(ARQ_RECEBIMENTOS)
     if src[0] is None:
-        st.error(f"❌ Fonte de dados (Recebimentos) não configurada. Veja README.md")
+        st.error("❌ Fonte de dados (Recebimentos) não configurada. Configure o secret `[github]` no Streamlit Cloud.")
         return pd.DataFrame()
     df = _read_excel(src, "Recebimentos")
     for c in ["Emissão", "Vencimento", "Previsão PGTO.", "Data PGTO."]:

@@ -2,6 +2,14 @@
 
 Dashboard executivo das 7 empresas da aliança GFlex, consumindo as planilhas consolidadas de Pagamentos e Recebimentos.
 
+## Arquitetura de Dados
+
+Este repo é **público** (só código). Os dados ficam em repo **privado** separado:
+- `gflex-financeiro-dashboard` (público) — código Streamlit
+- `gflex-financeiro-data` (privado) — apenas xlsx consolidados
+
+O loader baixa os xlsx via GitHub API autenticada (Personal Access Token nos secrets do Streamlit Cloud). **Dados nunca ficam expostos publicamente.**
+
 ## Rodar localmente
 
 ```bash
@@ -9,7 +17,7 @@ cd C:\BI-GFlex\dashboard
 streamlit run app.py --server.port 8502
 ```
 
-Fallback automático: se não houver secrets configurados, lê do OneDrive local em `C:\Users\Gustavo Gontijo\OneDrive\GFlex Financeiro\`.
+Fallback: se não houver secret `[github]`, lê do OneDrive local (`C:\Users\Gustavo Gontijo\OneDrive\GFlex Financeiro\`).
 
 ## Deploy no Streamlit Cloud
 
