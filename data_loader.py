@@ -17,21 +17,28 @@ from config import (
 # ============ HELPER: resolve fonte (URL remota via secrets OU caminho local) ============
 def _resolve_source(secret_key: str, nome_arquivo: str):
     """
-    Tenta URL dos secrets primeiro (pra deploy Cloud), fallback pro caminho local (PC do Gustavo).
-    Retorna: ('url', str) ou ('file', str) ou (None, None)
+    Prioridade de busca:
+    1) URL via secrets (Streamlit Cloud com link externo)
+    2) URL via variável de ambiente
+    3) Arquivo junto ao repo (xlsx commitado no repo privado — funciona no Cloud)
+    4) OneDrive local (fallback PC do Gustavo)
     """
-    # 1) Via secrets (Streamlit Cloud)
+    # 1) Secrets
     try:
         url = st.secrets["data"][secret_key]
         if url:
             return ("url", url)
     except Exception:
         pass
-    # 2) Via variável de ambiente
+    # 2) Env
     env_val = os.getenv(secret_key)
     if env_val:
         return ("url", env_val)
-    # 3) Fallback pra arquivo local
+    # 3) Arquivo no repo (mesma pasta que app.py)
+    repo_fp = os.path.join(os.path.dirname(os.path.abspath(__file__)), nome_arquivo)
+    if os.path.exists(repo_fp):
+        return ("file", repo_fp)
+    # 4) OneDrive local
     fp = os.path.join(ONEDRIVE_DIR, nome_arquivo)
     if os.path.exists(fp):
         return ("file", fp)
