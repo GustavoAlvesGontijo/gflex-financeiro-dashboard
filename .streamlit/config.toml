@@ -13,3 +13,8 @@ port = 8502
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# DEBUG TEMPORÁRIO: expor traceback no browser pra diagnosticar erro de deploy.
+# Remover após corrigir o bug (dados financeiros não devem vazar por traceback).
+showErrorDetails = "full"
