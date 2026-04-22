@@ -54,8 +54,15 @@ if not check_password():
 # =========================================
 # DADOS
 # =========================================
-df_pag_raw = load_pagamentos()
-df_rec_raw = load_recebimentos()
+# DEBUG: captura exceção pra mostrar traceback em vez de "Oh no"
+try:
+    df_pag_raw = load_pagamentos()
+    df_rec_raw = load_recebimentos()
+except Exception as _e:
+    import traceback
+    st.error("❌ Falha carregando dados — detalhes abaixo:")
+    st.code(traceback.format_exc())
+    st.stop()
 
 def ultima_atualizacao():
     # Local: pega mtime do arquivo
